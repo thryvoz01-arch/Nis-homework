@@ -1,0 +1,1227 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>NIS Homework</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231769aa'/%3E%3Ctext x='32' y='39' fill='white' font-family='Arial' font-size='19' font-weight='bold' text-anchor='middle'%3ENIS%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      --blue: #1769aa;
+      --blue-dark: #0f477a;
+      --blue-soft: #ebf5ff;
+      --pale-blue: #dceeff;
+      --paper: #f3f8fc;
+      --paper-2: #edf5fb;
+      --surface: rgba(255, 255, 255, .88);
+      --ink: #132a3a;
+      --muted: #5e7485;
+      --gold: #d5b35b;
+      --line: rgba(19, 42, 58, .12);
+      --shadow-soft: 0 18px 40px rgba(17, 76, 130, .12);
+      --shadow-card: 0 10px 24px rgba(15, 71, 122, .08);
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0;
+      background:
+        radial-gradient(circle at top, rgba(141, 196, 255, 0.3), transparent 30%),
+        linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 26%, #edf4fa 100%);
+      color: var(--ink);
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; border: 0; }
+    .hidden { display: none !important; }
+    .screen { min-height: 100vh; min-height: 100dvh; }
+
+    .intro-splash {
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: linear-gradient(145deg, #102f48 0%, #0a2033 52%, #173d57 100%);
+      color: white;
+      opacity: 1;
+      transition: opacity 350ms ease, visibility 350ms ease;
+    }
+    .intro-splash-exit { opacity: 0; visibility: hidden; pointer-events: none; }
+    .intro-splash-content { position: relative; z-index: 1; display: grid; justify-items: center; animation: introBrandIn 900ms cubic-bezier(.2, .8, .2, 1) both; }
+    .intro-logo { position: relative; width: 108px; height: 108px; border: 3px solid rgba(255, 255, 255, .84); border-radius: 24px; background: linear-gradient(180deg, #f9fcff 0%, #dcecff 100%); box-shadow: 0 18px 42px rgba(0, 0, 0, .28), 0 0 36px rgba(112, 188, 232, .18), inset 0 0 0 1px rgba(17, 78, 128, .12); }
+    .intro-logo .book-mark { inset: 9px; }
+    .intro-logo .nis { font-size: 22px; }
+    .intro-logo .homework { font-size: 8px; }
+    .intro-spinner { position: relative; width: 68px; height: 68px; margin-top: 28px; border: 1px solid rgba(234, 246, 255, .22); border-radius: 50%; box-shadow: 0 0 28px rgba(67, 153, 210, .12), inset 0 0 20px rgba(255, 255, 255, .035); }
+    .intro-spinner::before { position: absolute; inset: 8px; border: 1px solid rgba(234, 246, 255, .16); border-radius: 50%; content: ""; }
+    .intro-spinner::after { position: absolute; inset: -2px; border: 2px solid transparent; border-top-color: #f2ca70; border-right-color: rgba(112, 195, 238, .88); border-radius: 50%; animation: introSpin 1.15s linear infinite; content: ""; }
+    .intro-spinner span { position: absolute; inset: 0; animation: introSpin 1.6s linear infinite reverse; }
+    .intro-spinner span::before { position: absolute; top: -4px; left: 50%; width: 8px; height: 8px; border: 2px solid #d9f0ff; border-radius: 50%; background: #398ac2; box-shadow: 0 0 12px rgba(115, 202, 255, .8); content: ""; transform: translateX(-50%); }
+    @keyframes introBrandIn {
+      0% { opacity: 0; transform: translateY(18px) scale(.88); }
+      72% { opacity: 1; transform: translateY(-2px) scale(1.025); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes introSpin { to { transform: rotate(1turn); } }
+    body.dark .intro-splash { background: radial-gradient(ellipse at center 42%, rgba(53, 112, 150, .2), transparent 42%), linear-gradient(145deg, #071521 0%, #0b2638 52%, #10344b 100%); }
+
+    .login-screen {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, .78), transparent 46%),
+        linear-gradient(315deg, rgba(30, 115, 170, .12), transparent 52%),
+        linear-gradient(135deg, #edf5fb 0%, #dceaf5 52%, #f2f7fb 100%);
+      padding: max(28px, env(safe-area-inset-top)) max(28px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(28px, env(safe-area-inset-left));
+    }
+    .login-box {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 390px);
+      padding: 22px 18px 16px;
+      border: 1px solid rgba(23, 105, 170, .08);
+      border-radius: 22px;
+      background: rgba(255,255,255,.76);
+      box-shadow: 0 24px 52px rgba(19, 53, 88, .15), inset 0 1px 0 rgba(255,255,255,.8);
+      backdrop-filter: blur(16px);
+      text-align: center;
+    }
+    .logo { position: relative; overflow: hidden; width: 96px; height: 96px; margin: 0 auto 18px; border: 3px solid rgba(255, 255, 255, .78); border-radius: 20px; background: linear-gradient(180deg, #ffffff 0%, #edf5ff 100%); box-shadow: 0 14px 28px rgba(17, 78, 128, .18), inset 0 0 0 1px rgba(17, 78, 128, .08); }
+    .logo::before { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(23, 105, 170, .13), rgba(255, 255, 255, .22)); content: ""; }
+    .book-mark { position: absolute; inset: 9px 8px 9px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 7px; border-radius: 12px; background: linear-gradient(180deg, #2f7bd2 0%, #0f4c8c 100%); color: #f8fbff; box-shadow: inset 0 0 0 2px rgba(255,255,255,.14), 0 8px 14px rgba(15, 76, 140, .22); text-align: center; }
+    .book-mark::before, .book-mark::after { position: absolute; inset: 0; border-radius: 12px; content: ""; }
+    .book-mark::before { background: linear-gradient(180deg, rgba(255,255,255,.18), transparent 22%); }
+    .book-mark::after { inset: 8px 8px auto 8px; height: 2px; background: rgba(255,255,255,.18); border-radius: 999px; }
+    .book-mark .nis { position: relative; z-index: 1; font-size: 19px; line-height: 1; font-weight: 800; letter-spacing: 2px; }
+    .book-mark .homework { position: relative; z-index: 1; font-size: 7.5px; line-height: 1; font-weight: 700; letter-spacing: 2.4px; opacity: .92; }
+    @media (prefers-reduced-motion: reduce) {
+      .intro-splash-content, .intro-spinner::after, .intro-spinner span { animation: none; }
+    }
+    h1, h2, p { margin: 0; }
+    h1 { font-size: 28px; }
+    .subtitle { margin-top: 6px; color: var(--muted); font-size: 13px; }
+    .field { width: 100%; margin-top: 10px; padding: 14px; border: 1px solid #a8bdcc; border-radius: 10px; background: white; color: var(--ink); outline: none; }
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(23, 105, 170, .14); }
+    .primary { background: var(--blue); color: white; border-radius: 10px; padding: 13px 18px; font-weight: 600; }
+    .switch-auth { display: inline-block; margin-top: 12px; color: var(--blue); background: transparent; font-size: 12px; }
+    .wide { width: 100%; margin-top: 18px; }
+    .error { min-height: 18px; margin-top: 7px; color: #b42318; font-size: 12px; text-align: left; }
+
+    .app { min-height: 100vh; min-height: 100dvh; padding-bottom: calc(82px + env(safe-area-inset-bottom)); }
+    .header {
+      position: relative;
+      padding: calc(20px + env(safe-area-inset-top)) calc(22px + env(safe-area-inset-right)) 12px calc(22px + env(safe-area-inset-left));
+      background: linear-gradient(135deg, #1b7ac9 0%, #145996 48%, #0d4478 100%);
+      color: white;
+      box-shadow: 0 8px 28px rgba(14, 67, 117, .22);
+    }
+    .header-icon {
+      position: absolute;
+      top: calc(18px + env(safe-area-inset-top));
+      right: calc(22px + env(safe-area-inset-right));
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.26);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.17), rgba(255,255,255,.07));
+      color: white;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 14px rgba(8, 30, 52, .14);
+      transition: box-shadow 160ms ease, background 160ms ease;
+    }
+    .header-icon::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 9px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .header-icon svg {
+      position: relative;
+      z-index: 1;
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.12));
+      transition: transform 220ms ease;
+    }
+    .header-icon:hover svg { transform: rotate(24deg); }
+    .header-icon:hover {
+      background: linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,.1));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 10px 18px rgba(8, 30, 52, .18);
+    }
+    .header-icon:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+    .profile-button {
+      position: absolute;
+      top: calc(18px + env(safe-area-inset-top));
+      right: calc(76px + env(safe-area-inset-right));
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      padding: 2px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .58);
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.12));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 8px 18px rgba(10, 50, 90, .2);
+    }
+    .profile-button::after {
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(255,255,255,.34);
+      border-radius: 50%;
+      content: "";
+    }
+    .profile-button img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; position: relative; z-index: 1; }
+    .brand { display: inline-flex; align-items: center; gap: 9px; color: white; font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+    .brand-logo { position: relative; display: block; overflow: hidden; width: 42px; height: 42px; flex: 0 0 42px; border: 1px solid rgba(255, 255, 255, .7); border-radius: 10px; background: white; box-shadow: 0 3px 12px rgba(7, 46, 82, .22); }
+    .brand-logo .book-mark { inset: 3px; gap: 3px; border-radius: 7px; }
+    .brand-logo .book-mark .nis { font-size: 9px; letter-spacing: 1px; }
+    .brand-logo .book-mark .homework { font-size: 3px; letter-spacing: .6px; }
+    .brand-name { white-space: nowrap; }
+    .header h2 { margin-top: 8px; font-size: 25px; letter-spacing: -.03em; }
+    .profile-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: #dfeeff; border: 2px solid rgba(255,255,255,.7); }
+    .date { margin-top: 7px; color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+    main { width: min(100%, 700px); margin: 0 auto; padding: 18px max(18px, env(safe-area-inset-right)) 100px max(18px, env(safe-area-inset-left)); }
+    .section-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .eyebrow { color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+    .card {
+      margin-top: 10px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.62));
+      box-shadow: var(--shadow-card);
+      animation: contentEnter 360ms both;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .app.compact-mode .card { margin-top: 7px; padding: 11px; border-radius: 12px; }
+    .app.compact-mode .section-row { margin-bottom: 8px; }
+    .app.compact-mode .lesson-info span { margin-top: 2px; }
+    .schedule-board-wrap { margin-top: 12px; padding: 0; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.22); box-shadow: 0 14px 26px rgba(15, 71, 122, .08); overflow-x: auto; }
+    .schedule-board { width: 100%; min-width: 880px; border-collapse: collapse; table-layout: fixed; background: rgba(248, 250, 252, .72); }
+    .schedule-board th, .schedule-board td { border: 1px solid rgba(19, 42, 58, .12); padding: 0; text-align: center; }
+    .schedule-board thead th { background: rgba(214, 230, 242, .85); color: #193d56; font-size: 11px; font-weight: 700; padding: 8px 2px; }
+    .schedule-board thead th:first-child { position: sticky; left: 0; z-index: 2; width: 60px; }
+    .schedule-board tbody tr > :first-child { position: sticky; left: 0; z-index: 1; background: rgba(248,250,252,.96); color: #112a3d; font-size: 20px; font-weight: 700; width: 60px; }
+    .schedule-board .cell { min-height: 72px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3px; padding: 7px 5px; font-size: 11px; }
+    .schedule-board .cell strong { display: block; font-size: 12px; }
+    .schedule-board .cell span { display: block; color: rgba(19, 42, 58, .78); font-size: 9px; }
+    .schedule-board .c1 { background: #cfe7f8; }
+    .schedule-board .c2 { background: #cfeef2; }
+    .schedule-board .c3 { background: #dce7f7; }
+    .schedule-board .c4 { background: #d9d3f6; }
+    .schedule-board .c5 { background: #f7d3d2; }
+    .schedule-board .c6 { background: #f2d8b7; }
+    .schedule-board .c7 { background: #f5d5db; }
+    .schedule-board .c8 { background: #c8e6d0; }
+    .schedule-board .c9 { background: #d3ebf8; }
+    .schedule-week { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; margin-top: 12px; }
+    .schedule-day { min-width: 0; margin: 0; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-card); }
+    .schedule-day h3 { margin: 0 0 10px; color: var(--blue-dark); font-size: 16px; }
+    .schedule-day ol { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+    .schedule-day li { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 7px 9px; border-radius: 10px; background: var(--blue-soft); }
+    .schedule-lesson-number { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; background: var(--blue); color: white; font-size: 12px; font-weight: 700; }
+    .schedule-lesson-info { display: grid; gap: 2px; min-width: 0; }
+    .schedule-lesson-info strong { overflow-wrap: anywhere; font-size: 13px; }
+    .schedule-lesson-info span { color: var(--muted); font-size: 11px; }
+    body.dark .schedule-day { background: var(--surface); }
+    body.dark .schedule-day li { background: rgba(74, 147, 199, .18); }
+    @keyframes contentEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    #content.section-transition { animation: sectionTransition 280ms cubic-bezier(.2, .7, .2, 1) both; }
+    @keyframes sectionTransition { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    .primary, .small-btn, .secondary, .nav-btn { transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease; }
+    .primary {
+      background: linear-gradient(135deg, var(--blue) 0%, #2c8ad9 100%);
+      color: white;
+      box-shadow: 0 10px 20px rgba(23, 105, 170, .2);
+    }
+    .primary:hover, .small-btn:hover, .secondary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 71, 122, .14); }
+    .next { padding: 17px; background: linear-gradient(135deg, #0f5b9a 0%, #1a75bd 100%); color: white; border-radius: 18px; box-shadow: var(--shadow-soft); }
+    .next .eyebrow { color: var(--gold); }
+    .next-line { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 5px; }
+    .next strong { font-size: 19px; }
+    .lesson, .teacher { display: flex; align-items: center; gap: 14px; }
+    .lesson-info, .teacher-info { flex: 1; }
+    .lesson-info strong, .teacher-info strong { display: block; font-size: 14px; }
+    .lesson-info span, .teacher-info span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pale-blue); }
+    .mode { display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px; }
+    .small-btn { padding: 8px 10px; border-radius: 9px; background: var(--pale-blue); color: var(--blue); font-size: 11px; font-weight: 600; }
+    .small-btn.active { background: var(--blue); color: white; }
+    .check { width: 20px; height: 20px; accent-color: var(--blue); }
+    .teacher-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: var(--pale-blue); color: var(--blue); font-weight: 700; }
+    .settings-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .settings-row strong { display: block; font-size: 15px; }
+    .settings-back { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--blue); font-weight: 600; }
+    .settings-back svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .switch { width: 44px; height: 24px; appearance: none; border-radius: 20px; background: #b4c5d0; transition: .2s; }
+    .switch:checked { background: var(--blue); }
+    .switch::before { content: ""; display: block; width: 20px; height: 20px; margin: 2px; border-radius: 50%; background: white; transition: .2s; }
+    .switch:checked::before { transform: translateX(20px); }
+
+    .bottom-nav {
+      position: fixed;
+      z-index: 5;
+      right: auto;
+      bottom: calc(8px + env(safe-area-inset-bottom));
+      left: 50%;
+      width: max-content;
+      max-width: calc(100% - 24px);
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 60px));
+      align-items: center;
+      padding: 5px 8px 6px;
+      border: 1px solid rgba(255, 255, 255, .4);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .78);
+      box-shadow: 0 12px 28px rgba(15, 71, 122, .12);
+      backdrop-filter: blur(22px) saturate(145%);
+      -webkit-backdrop-filter: blur(22px) saturate(145%);
+      transform: translateX(-50%);
+    }
+    .admin-mode .bottom-nav { grid-template-columns: repeat(6, minmax(0, 60px)); }
+    .ai-menu { position: absolute; right: 0; bottom: calc(100% + 10px); left: 0; display: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 9px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 10px 28px rgba(15, 71, 122, .18); }
+    .ai-menu.open { display: grid; }
+    .ai-menu a { min-width: 0; min-height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border-radius: 8px; color: var(--ink); font-size: 10px; text-decoration: none; }
+    .ai-menu a:hover, .ai-menu a:focus-visible { background: var(--pale-blue); outline: none; }
+    .ai-menu img { width: 24px; height: 24px; object-fit: contain; }
+    .nav-btn { min-width: 0; min-height: 44px; display: flex; align-items: center; justify-content: center; padding: 4px 2px; border-radius: 12px; background: transparent; color: var(--muted); text-align: center; }
+    .nav-btn span { display: none; }
+    .nav-btn svg {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 auto;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.08));
+      transition: transform 160ms ease;
+    }
+    .nav-btn:hover svg { transform: translateY(-1px) scale(1.06); }
+    .nav-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .nav-btn:hover:not(.active) { background: rgba(23, 105, 170, .08); color: var(--blue); }
+    .nav-btn.active {
+      background: linear-gradient(180deg, rgba(220, 238, 255, 1), rgba(210, 230, 247, .9));
+      color: var(--blue);
+      font-weight: 700;
+      box-shadow: inset 0 0 0 1px rgba(23, 105, 170, .1), 0 3px 8px rgba(23, 105, 170, .08);
+    }
+    .nav-btn.active svg { stroke-width: 2; filter: drop-shadow(0 1px 1px rgba(23, 105, 170, .18)); }
+    .profile-card { display: flex; align-items: center; gap: 12px; }
+    .profile-avatar-lg { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #dfeeff; border: 2px solid rgba(23, 105, 170, .12); }
+      .profile-avatar-xl { width: 72px; height: 72px; }
+    .avatar-upload { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: var(--pale-blue); color: var(--blue); font-weight: 600; cursor: pointer; }
+    .avatar-upload input { display: none; }
+    .user-profile-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .user-profile-row:last-child { border-bottom: 0; }
+    .user-profile-row strong { display: block; }
+    .user-profile-row span { display: block; color: var(--muted); font-size: 12px; }
+    dialog { width: min(90%, 380px); border: 0; border-radius: 18px; padding: 22px; color: var(--ink); box-shadow: 0 18px 60px rgba(0, 0, 0, .25); }
+    dialog::backdrop { background: rgba(7, 21, 33, .42); }
+    dialog h3 { margin: 0 0 12px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+    .secondary { padding: 10px 13px; border-radius: 9px; background: var(--pale-blue); color: var(--blue); }
+    .olympiad-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+    .olympiad-head h3 { margin-top: 5px; font-size: 20px; }
+    .olympiad-head p { margin-top: 5px; }
+    .olympiad-count { flex: 0 0 auto; padding: 7px 9px; border-radius: 8px; background: var(--pale-blue); color: var(--blue); font-size: 11px; font-weight: 700; }
+    .olympiad-upload { margin: 0 0 22px; }
+    .olympiad-dropzone { min-height: 158px; display: grid; place-content: center; justify-items: center; gap: 6px; padding: 20px; border: 1px dashed #9ab7c8; border-radius: 10px; background: rgba(220, 238, 255, .36); text-align: center; cursor: pointer; transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease; }
+    .olympiad-dropzone:hover, .olympiad-dropzone.dragging { border-color: var(--blue); background: var(--pale-blue); transform: translateY(-1px); }
+    .olympiad-dropzone label { display: grid; justify-items: center; gap: 6px; }
+    .olympiad-upload-icon { width: 38px; height: 38px; display: grid; place-items: center; margin-bottom: 3px; border-radius: 50%; background: white; color: var(--blue); font-size: 22px; box-shadow: 0 3px 12px rgba(15, 71, 122, .1); }
+    .olympiad-dropzone strong { font-size: 14px; }
+    .olympiad-dropzone span, .olympiad-dropzone small { color: var(--muted); font-size: 12px; }
+    .olympiad-dropzone small { font-size: 10px; }
+    .olympiad-status { min-height: 18px; margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+    .olympiad-file { display: flex; align-items: center; gap: 11px; }
+    .olympiad-file-kind.pdf { background: #f9e9e8; color: #a23b32; }
+    .olympiad-file-kind.word { background: #e6eff9; color: #285b91; }
+    .olympiad-file-info { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+    .olympiad-file-info strong { display: block; font-size: 13px; line-height: 1.35; }
+    .olympiad-file-info span { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .olympiad-file-actions { display: flex; flex: 0 0 auto; gap: 6px; }
+    .olympiad-empty { padding: 24px 16px; border: 1px dashed var(--line); border-radius: 10px; text-align: center; }
+    .stats-user { padding: 15px; }
+    .stats-user-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+    .stats-user-head strong { overflow-wrap: anywhere; }
+    .stats-progress { color: var(--blue); font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .stats-task { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 12px; }
+    .stats-task-status { flex: 0 0 auto; color: var(--muted); font-size: 11px; }
+    .stats-task-status.done { color: #286344; font-weight: 700; }
+    .stats-history { margin-top: 24px; }
+    .stats-history h3 { margin-bottom: 8px; font-size: 16px; }
+    .stats-event { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .stats-event-copy { min-width: 0; display: flex; align-items: center; gap: 9px; }
+    .stats-event-avatar { width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; object-fit: cover; background: #dfeeff; }
+    .stats-event-detail { min-width: 0; }
+    .stats-event-copy strong, .stats-event-copy span { display: block; overflow-wrap: anywhere; }
+    .stats-event-copy span, .stats-event time { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    @media (max-width: 480px) {
+      .olympiad-file { flex-wrap: wrap; }
+      .olympiad-file-info { flex-basis: calc(100% - 58px); }
+      .olympiad-file-actions { width: 100%; justify-content: flex-end; }
+    }
+    body.dark {
+      --paper: #071521;
+      --paper-2: #0d1d2a;
+      --surface: rgba(16, 37, 54, .9);
+      --ink: #f3f8fc;
+      --muted: #a9bdca;
+      --line: rgba(243, 248, 252, .16);
+      background:
+        radial-gradient(circle at top, rgba(71, 124, 184, 0.25), transparent 26%),
+        linear-gradient(180deg, #081b2a 0%, #071521 26%, #06151f 100%);
+    }
+    body.dark .login-screen {
+      background:
+        linear-gradient(135deg, rgba(88, 154, 198, .12), transparent 46%),
+        linear-gradient(315deg, rgba(200, 226, 242, .05), transparent 52%),
+        linear-gradient(135deg, #071521 0%, #0b2638 52%, #102538 100%);
+    }
+    body.dark .login-box {
+      background: rgba(14, 28, 38, .75);
+      border-color: rgba(180, 210, 234, .14);
+      box-shadow: 0 18px 38px rgba(8, 14, 20, .26);
+    }
+    body.dark .field { background: #102536; color: white; border-color: #3c5a6d; }
+    body.dark .card { background: linear-gradient(180deg, rgba(18, 38, 52, .9), rgba(11, 27, 38, .86)); }
+    body.dark .bottom-nav { background: rgba(16, 37, 54, .82); }
+    body.dark .schedule-photo-frame {
+      background: linear-gradient(180deg, rgba(14, 27, 36, .92), rgba(10, 17, 24, .8));
+      border-color: rgba(164, 189, 205, .16);
+      box-shadow: 0 14px 28px rgba(0,0,0,.23);
+    }
+    body.dark .schedule-photo { filter: brightness(.82) contrast(1.08) saturate(1.08); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+    @media (max-width: 380px) {
+      .header { padding-right: 16px; padding-left: 16px; }
+      .fullscreen-btn { right: calc(16px + env(safe-area-inset-right)); }
+      .nav-btn { font-size: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <section id="introSplash" class="intro-splash" role="status" aria-label="NIS Homework">
+    <div class="intro-splash-content" aria-hidden="true">
+      <div class="intro-logo"><div class="book-mark"><span class="nis">NIS</span><span class="homework">HOMEWORK</span></div></div>
+      <div class="intro-spinner"><span></span></div>
+    </div>
+  </section>
+  <section id="loginScreen" class="screen login-screen">
+    <form id="loginForm" class="login-box">
+      <div class="logo" aria-label="Логотип NIS Homework">
+        <div class="book-mark"><span class="nis">NIS</span><span class="homework">HOMEWORK</span></div>
+      </div>
+      <p class="subtitle">Войди, чтобы открыть расписание</p>
+      <input id="login" class="field" placeholder="Логин" autocomplete="username">
+      <input id="password" class="field" type="password" placeholder="Пароль" autocomplete="current-password">
+      <div id="loginError" class="error"></div>
+      <button id="submitAuth" class="primary wide" type="submit">Войти</button>
+      <button id="switchAuth" class="switch-auth" type="button">Создать обычный аккаунт</button>
+    </form>
+  </section>
+
+  <section id="app" class="app hidden">
+    <header class="header">
+      <div class="brand" aria-label="NIS Homework"><div class="brand-logo" aria-hidden="true"><div class="book-mark"><span class="nis">NIS</span><span class="homework">HOMEWORK</span></div></div><span id="logoText" class="brand-name">NIS HOMEWORK</span></div>
+      <button id="profileButton" class="profile-button" type="button" aria-label="Мой профиль" title="Мой профиль" onclick="render('profile')"><img src="" alt=""></button>
+      <button id="settingsButton" class="header-icon" type="button" aria-label="Настройки" title="Настройки">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 1.72l-.13.96a2 2 0 0 1-1 1.73l-.87.5a2 2 0 0 1-1.98-.08l-.79-.49a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.79.49a2 2 0 0 1 1 1.73v1a2 2 0 0 1-1 1.73l-.79.49a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.79-.49a2 2 0 0 1 1.98-.08l.87.5a2 2 0 0 1 1 1.73l.13.96a2 2 0 0 0 2 1.72h.44a2 2 0 0 0 2-1.72l.13-.96a2 2 0 0 1 1-1.73l.87-.5a2 2 0 0 1 1.98.08l.79.49a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.79-.49a2 2 0 0 1-1-1.73v-1a2 2 0 0 1 1-1.73l.79-.49a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.79.49a2 2 0 0 1-1.98-.08l-.87-.5a2 2 0 0 1-1-1.73l-.13-.96A2 2 0 0 0 12.22 2Z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+      <h2 id="pageTitle">Моё расписание</h2>
+      <div id="currentDate" class="date"></div>
+    </header>
+    <main id="content"></main>
+    <nav class="bottom-nav" aria-label="Навигация">
+      <button class="nav-btn active" data-page="schedule" aria-label="Уроки" title="Уроки">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M8 2.5v4M16 2.5v4M3 9h18m-13 4h3m-3 4h2m4-3 1.5 1.5L19 13"/></svg><span>Уроки</span>
+      </button>
+      <button class="nav-btn" data-page="tasks" aria-label="Задания" title="Задания">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4V2.5h6V4m-6 8 2 2 4-4m-4 7h4"/></svg><span>Задания</span>
+      </button>
+      <button class="nav-btn" data-page="teachers" aria-label="Учителя" title="Учителя">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-4-7.4M16 3.1a5 5 0 0 1 0 9.8"/></svg><span>Учителя</span>
+      </button>
+      <button class="nav-btn" data-page="olympiads" aria-label="Олимпиады" title="Олимпиады">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Zm0 2H4v2a4 4 0 0 0 4 4m8-6h4v2a4 4 0 0 1-4 4m-4 2v4m-4 3h8m-7-3h6"/></svg><span>Олимпиады</span>
+      </button>
+      <button class="nav-btn hidden" data-page="stats" aria-label="Статистика" title="Статистика">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6" rx="1"/><rect x="13" y="8" width="3" height="10" rx="1"/><rect x="19" y="4" width="2" height="14" rx="1"/></svg><span>Статистика</span>
+      </button>
+      <div id="aiMenu" class="ai-menu" role="menu" aria-label="Популярные ИИ">
+        <a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer" role="menuitem"><img src="https://www.google.com/s2/favicons?domain=gemini.google.com&sz=64" alt=""><span>Gemini</span></a>
+        <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer" role="menuitem"><img src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64" alt=""><span>ChatGPT</span></a>
+        <a href="https://copilot.microsoft.com/" target="_blank" rel="noopener noreferrer" role="menuitem"><img src="https://www.google.com/s2/favicons?domain=copilot.microsoft.com&sz=64" alt=""><span>Copilot</span></a>
+        <a href="https://claude.ai/" target="_blank" rel="noopener noreferrer" role="menuitem"><img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=64" alt=""><span>Claude</span></a>
+        <a href="https://www.perplexity.ai/" target="_blank" rel="noopener noreferrer" role="menuitem"><img src="https://www.google.com/s2/favicons?domain=perplexity.ai&sz=64" alt=""><span>Perplexity</span></a>
+        <a href="https://chat.deepseek.com/" target="_blank" rel="noopener noreferrer" role="menuitem"><img src="https://www.google.com/s2/favicons?domain=deepseek.com&sz=64" alt=""><span>DeepSeek</span></a>
+      </div>
+      <button id="aiMenuButton" class="nav-btn" type="button" aria-label="Открыть популярные ИИ" title="Популярные ИИ" aria-controls="aiMenu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M5 7.5h14M5 16.5h14"/></svg><span>ИИ</span>
+      </button>
+    </nav>
+  </section>
+
+  <dialog id="editDialog">
+    <h3 id="teacherDialogTitle">Изменить учителя</h3>
+    <input id="teacherRole" class="field" placeholder="Имя или предмет">
+    <input id="teacherRoom" class="field" placeholder="Кабинет">
+    <div class="dialog-actions"><button id="deleteTeacher" class="secondary">Удалить</button><button id="cancelEdit" class="secondary">Отмена</button><button id="saveEdit" class="primary">Сохранить</button></div>
+  </dialog>
+  <dialog id="lessonDialog">
+    <h3 id="lessonDialogTitle">Изменить урок</h3>
+    <input id="lessonSubject" class="field" placeholder="Предмет">
+    <input id="lessonRoom" class="field" placeholder="Кабинет">
+    <div class="dialog-actions"><button id="cancelLesson" class="secondary">Отмена</button><button id="saveLesson" class="primary">Сохранить</button></div>
+  </dialog>
+  <dialog id="taskDialog">
+    <h3 id="taskDialogTitle">Изменить задание</h3>
+    <input id="taskSubject" class="field" placeholder="Предмет">
+    <input id="taskDescription" class="field" placeholder="Описание задания">
+    <input id="taskDue" class="field" placeholder="Срок выполнения">
+    <div class="dialog-actions"><button id="deleteTask" class="secondary">Удалить</button><button id="cancelTask" class="secondary">Отмена</button><button id="saveTask" class="primary">Сохранить</button></div>
+  </dialog>
+  <script>
+    const adminAccounts = [
+      { login: 'suleydev', password: '2013' },
+      { login: 'Yerislam', password: '1234qrwe' },
+      { login: 'Nuriden', password: '2012qrwe' },
+      { login: 'qwertydev', password: 'qwerty@123' }
+    ];
+    const themeKey = 'plannerTheme';
+    const rememberSessionKey = 'plannerRememberSession';
+    const savedSessionKey = 'plannerSavedSession';
+    let rememberSession = localStorage.getItem(rememberSessionKey) === 'true';
+    let isAdmin = false;
+    let isRegisterMode = false;
+    let logoText = localStorage.getItem('plannerLogoText') || 'NIS HOMEWORK';
+    if (logoText === 'НИШ') {
+      logoText = 'NIS HOMEWORK';
+      localStorage.setItem('plannerLogoText', logoText);
+    }
+    let editingLessonIndex = null;
+    let editingTeacherIndex = null;
+    let editingTaskIndex = null;
+    let currentUserLogin = '';
+    let currentPage = 'schedule';
+    let previousPage = 'schedule';
+    const olympiadChannel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('schoolPlannerOlympiads') : null;
+    const defaultTeachers = [
+      { role: 'Учитель математики', room: 'Кабинет 214' },
+      { role: 'Учитель английского языка', room: 'Кабинет 108' },
+      { role: 'Учитель физики', room: 'Лаборатория 3' },
+      { role: 'Учитель истории Казахстана', room: 'Кабинет 302' },
+      { role: 'Учитель информатики', room: 'Компьютерный класс' },
+      { role: 'Учитель биологии', room: 'Кабинет 206' },
+      { role: 'Учитель географии', room: 'Кабинет 118' },
+      { role: 'Учитель русского языка', room: 'Кабинет 112' }
+    ];
+    let teachers = JSON.parse(localStorage.getItem('plannerTeachers') || 'null') || defaultTeachers;
+    const savedAccounts = JSON.parse(localStorage.getItem('plannerAccounts') || '[]');
+    const registeredAccounts = Array.isArray(savedAccounts)
+      ? savedAccounts.filter(account => account?.login && account.passwordCredential).map(account => ({ login: account.login, passwordCredential: account.passwordCredential }))
+      : [];
+    localStorage.setItem('plannerAccounts', JSON.stringify(registeredAccounts));
+    const defaultTasks = [
+      ['Математика', 'Задачи 4–8, страница 56', 'На завтра'],
+      ['Английский язык', 'Подготовить рассказ о хобби', 'На завтра'],
+      ['Физика', 'Повторить тему «Сила и движение»', 'Пятница'],
+      ['История Казахстана', 'Прочитать параграф 12', 'Понедельник']
+    ];
+    const savedTasks = JSON.parse(localStorage.getItem('plannerTasks') || 'null') || defaultTasks;
+    let tasks = savedTasks.map((task, index) => Array.isArray(task)
+      ? { id: `task-${Date.now()}-${index}`, subject: task[0], description: task[1], due: task[2] }
+      : { ...task, id: task.id || `task-${Date.now()}-${index}` });
+    localStorage.setItem('plannerTasks', JSON.stringify(tasks));
+    let taskProgress = JSON.parse(localStorage.getItem('plannerTaskProgress') || '[]');
+    let taskActivity = JSON.parse(localStorage.getItem('plannerTaskActivity') || '[]');
+    const lessons = [
+      ['Математика', 'Кабинет 214'], ['Английский язык', 'Кабинет 108'],
+      ['Физика', 'Лаборатория 3'], ['История Казахстана', 'Кабинет 302'],
+      ['Информатика', 'Компьютерный класс'], ['Биология', 'Кабинет 206'],
+      ['География', 'Кабинет 118'], ['Русский язык', 'Кабинет 112']
+    ];
+    const scheduleDays = [
+      { name: 'Пн', lessons: { 1: ['CHB-103', 'Geo', 2], 3: ['GEK-208', 'Chem', 2], 5: ['CHB-102', 'HKz', 2], 7: ['CHB-203', 'Bio'], 8: ['GEK-218', 'Math'] } },
+      { name: 'Вт', lessons: { 1: ['T-304', 'English', 2], 3: ['T-103', 'Kazakh', 2], 5: ['GEK-109', 'Art', 2], 7: ['T-204', 'Russian', 2] } },
+      { name: 'Ср', lessons: { 1: ['GEK-218', 'Math', 2], 3: ['GEK-208', 'Chem'], 4: ['GEK-201', 'WH'], 5: ['PHM-106', 'Phys', 2], 7: ['T-103', 'Kazakh', 2] } },
+      { name: 'Чт', lessons: { 1: ['CHB-203', 'Bio', 2], 3: ['SportHall', 'PE', 2], 5: ['T-105', 'Hour of Dev'], 6: ['GEK-218', 'Math'], 7: ['T-103', 'Kazakh'], 8: ['GEK-303', 'FoES'] } },
+      { name: 'Пт', lessons: { 1: ['GEK-219', 'CS', 2], 3: ['PHM-106', 'Phys'], 4: ['T-204', 'Russian'], 5: ['T-104', 'Math', 2], 7: ['T-304', 'English', 2], 9: ['GEK-219', 'Global Scholars'] } }
+    ];
+    const content = document.querySelector('#content');
+    const title = document.querySelector('#pageTitle');
+
+    async function hashSecret(secret, salt) {
+      const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
+      return Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+    function createSalt() { return crypto.getRandomValues(new Uint8Array(16)); }
+    function encodeSalt(salt) { return Array.from(salt, byte => byte.toString(16).padStart(2, '0')).join(''); }
+    function decodeSalt(salt) { return new Uint8Array(salt.match(/.{2}/g).map(byte => parseInt(byte, 16))); }
+    async function createCredential(secret) {
+      const salt = createSalt();
+      return { salt: encodeSalt(salt), hash: await hashSecret(secret, salt) };
+    }
+    async function matchesCredential(secret, credential) {
+      return credential && await hashSecret(secret, decodeSalt(credential.salt)) === credential.hash;
+    }
+    async function requestFullscreenIfPossible() {
+      try {
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch (error) {
+        // Fullscreen is optional; ignore browser restrictions.
+      }
+    }
+    function setCurrentUserAvatarInHeader() {
+      const photo = document.querySelector('#profileButton img');
+      if (!photo) return;
+      photo.src = getUserAvatar(currentUserLogin || 'user');
+    }
+    function persistTeachers() {
+      localStorage.setItem('plannerTeachers', JSON.stringify(teachers));
+    }
+    function persistRegisteredAccounts() {
+      localStorage.setItem('plannerAccounts', JSON.stringify(registeredAccounts));
+    }
+    function persistTasks() {
+      localStorage.setItem('plannerTasks', JSON.stringify(tasks));
+    }
+    function persistTaskProgress() {
+      localStorage.setItem('plannerTaskProgress', JSON.stringify(taskProgress));
+    }
+    function persistTaskActivity() {
+      localStorage.setItem('plannerTaskActivity', JSON.stringify(taskActivity));
+    }
+    function syncScreenInteractivity() {
+      const loginScreen = document.querySelector('#loginScreen');
+      const app = document.querySelector('#app');
+      if (loginScreen) loginScreen.inert = loginScreen.classList.contains('hidden');
+      if (app) app.inert = app.classList.contains('hidden');
+    }
+    function openApp(admin = false, login = '') {
+      isAdmin = admin;
+      currentUserLogin = login;
+      if (rememberSession) localStorage.setItem(savedSessionKey, JSON.stringify({ login, isAdmin: admin }));
+      document.querySelector('#app').classList.toggle('compact-mode', localStorage.getItem('plannerCompactView') === 'true');
+      setCurrentUserAvatarInHeader();
+      document.querySelector('#app').classList.toggle('admin-mode', admin);
+      document.querySelector('[data-page="stats"]').classList.toggle('hidden', !admin);
+      document.querySelector('#loginScreen').classList.add('hidden');
+      document.querySelector('#app').classList.remove('hidden');
+      syncScreenInteractivity();
+      render();
+      requestFullscreenIfPossible();
+    }
+    function logout() {
+      if (localStorage.getItem('plannerConfirmLogout') !== 'false' && !confirm('Выйти из аккаунта?')) return;
+      isAdmin = false;
+      currentUserLogin = '';
+      localStorage.removeItem(savedSessionKey);
+      const profileButton = document.querySelector('#profileButton img');
+      if (profileButton) profileButton.src = getUserAvatar('user');
+      document.querySelector('#app').classList.remove('admin-mode');
+      document.querySelector('[data-page="stats"]').classList.add('hidden');
+      document.querySelector('#app').classList.add('hidden');
+      document.querySelector('#loginScreen').classList.remove('hidden');
+      document.querySelector('#loginForm').reset();
+      document.querySelector('#loginError').textContent = '';
+      isRegisterMode = false;
+      document.querySelector('#login').classList.remove('hidden');
+      document.querySelector('#password').classList.remove('hidden');
+      document.querySelector('#switchAuth').classList.remove('hidden');
+      document.querySelector('#submitAuth').textContent = 'Войти';
+      document.querySelector('#switchAuth').textContent = 'Создать обычный аккаунт';
+      syncScreenInteractivity();
+    }
+    async function toggleFullscreen() {
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else await document.documentElement.requestFullscreen();
+      } catch (error) {
+        document.querySelector('#loginError').textContent = 'Полноэкранный режим недоступен в этом браузере.';
+      }
+    }
+
+    function updateCurrentDate() {
+      const parts = new Intl.DateTimeFormat('ru-RU', {
+        timeZone: 'Asia/Almaty',
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      }).formatToParts(new Date());
+      const value = type => parts.find(part => part.type === type).value;
+      document.querySelector('#currentDate').textContent = `${value('weekday').toUpperCase()} · ${value('day')} ${value('month').toUpperCase()}`;
+    }
+
+    function olympiadHeaderMarkup() {
+      return '<div class="olympiad-head"><div><b class="eyebrow">ПОДГОТОВКА</b><h3>Олимпиадные материалы</h3><p class="muted">Задания и документы для самостоятельной работы</p></div><span id="olympiadCount" class="olympiad-count">Загрузка</span></div>';
+    }
+    function scheduleMarkup() {
+      const dayNames = { Пн: 'Понедельник', Вт: 'Вторник', Ср: 'Среда', Чт: 'Четверг', Пт: 'Пятница' };
+      const days = scheduleDays.map(day => `
+        <article class="schedule-day">
+          <h3>${dayNames[day.name] || escapeHtml(day.name)}</h3>
+          <ol>${Object.entries(day.lessons)
+            .sort(([first], [second]) => Number(first) - Number(second))
+            .map(([number, [room, subject, duration = 1]]) => {
+              const lastNumber = Number(number) + duration - 1;
+              const lessonNumber = duration > 1 ? `${number}–${lastNumber}` : number;
+              return `<li><span class="schedule-lesson-number">${escapeHtml(lessonNumber)}</span><span class="schedule-lesson-info"><strong>${escapeHtml(subject)}</strong><span>${escapeHtml(room)}</span></span></li>`;
+            })
+            .join('')}</ol>
+        </article>`).join('');
+      return `<section class="schedule-week" aria-label="Расписание уроков на неделю">${days}</section>`;
+    }
+    function render(page = 'schedule') {
+      if (page === 'stats' && !isAdmin) page = 'schedule';
+      if (currentPage !== page) {
+        content.classList.remove('section-transition');
+        void content.offsetWidth;
+        content.classList.add('section-transition');
+      }
+      currentPage = page;
+      document.querySelector('.bottom-nav').classList.toggle('hidden', page === 'settings');
+      updateCurrentDate();
+      document.querySelectorAll('.nav-btn[data-page]').forEach(btn => btn.classList.toggle('active', btn.dataset.page === page));
+      const titles = { schedule: 'Моё расписание', tasks: 'Домашние задания', teachers: 'Учителя', olympiads: 'Олимпиады', stats: 'Статистика', profile: 'Профиль', settings: 'Настройки' };
+      title.textContent = page === 'olympiads' && !isAdmin ? '' : titles[page];
+      const logoTextNode = document.querySelector('#logoText');
+      if (logoTextNode) logoTextNode.textContent = logoText;
+      if (page === 'schedule') {
+        content.innerHTML = scheduleMarkup();
+      }
+      if (page === 'tasks') {
+        content.innerHTML = `<div class="section-row"><span class="muted">Отметь выполненное</span></div>${tasks.map((task, index) => `<div class="card lesson"><div class="lesson-info"><b class="eyebrow">${escapeHtml(task.subject).toUpperCase()}</b><strong>${escapeHtml(task.description)}</strong><span>${escapeHtml(task.due)}</span></div>${isAdmin ? `<button class="small-btn" onclick="openTaskEditor(${index})">Изменить</button>` : ''}<input class="check" type="checkbox" data-task-id="${escapeHtml(task.id)}" aria-label="${isTaskCompleted(currentUserLogin, task.id) ? 'Снять отметку' : 'Отметить выполненным'}: ${escapeHtml(task.subject)}" ${isTaskCompleted(currentUserLogin, task.id) ? 'checked' : ''}></div>`).join('')}${tasks.length ? '' : '<p class="muted">Заданий пока нет.</p>'}${isAdmin ? '<button class="primary wide" onclick="openTaskEditor(null)">Добавить задание</button>' : ''}`;
+        content.querySelectorAll('.check').forEach(checkbox => checkbox.addEventListener('change', () => setTaskCompletion(checkbox.dataset.taskId, checkbox.checked)));
+      }
+      if (page === 'teachers') content.innerHTML = `<p class="muted">Демо-данные. Реальные контакты добавляйте только с согласия учителя.</p>${teachers.map((teacher, index) => `<div class="card teacher"><div class="teacher-icon">☎</div><div class="teacher-info"><strong>${teacher.role}</strong><span>${teacher.room}</span>${teacher.phone ? `<span style="color:var(--blue)">${teacher.phone}</span>` : ''}</div>${isAdmin ? `<button class="small-btn" onclick="openEditor(${index})">Изменить</button>` : ''}</div>`).join('')}${isAdmin ? '<button class="primary wide" onclick="openEditor(null)">Добавить учителя</button>' : ''}`;
+      if (page === 'olympiads') {
+        content.innerHTML = isAdmin ? `${olympiadHeaderMarkup()}<section class="olympiad-upload"><div id="olympiadDropzone" class="olympiad-dropzone"><input id="olympiadUpload" class="hidden" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple><label for="olympiadUpload"><span class="olympiad-upload-icon" aria-hidden="true">↑</span><strong>Добавить материалы</strong><span>Перетащи файлы сюда или выбери на устройстве</span><small>PDF или Word · до 20 МБ на файл</small></label></div><p id="olympiadUploadStatus" class="olympiad-status" role="status" aria-live="polite"></p></section><div id="olympiadFiles"></div>` : '';
+        const uploadInput = document.querySelector('#olympiadUpload');
+        if (uploadInput) uploadInput.addEventListener('change', uploadOlympiadFiles);
+        const dropzone = document.querySelector('#olympiadDropzone');
+        if (dropzone) {
+          dropzone.addEventListener('dragover', event => { event.preventDefault(); dropzone.classList.add('dragging'); });
+          dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragging'));
+          dropzone.addEventListener('drop', event => { event.preventDefault(); dropzone.classList.remove('dragging'); uploadOlympiadFiles({ currentTarget: uploadInput, files: event.dataTransfer.files }); });
+        }
+        renderOlympiadFiles();
+      }
+      if (page === 'stats' && isAdmin) renderTaskStats();
+      if (page === 'profile') renderProfile();
+      if (page === 'settings') content.innerHTML = `
+        <button class="settings-back" type="button" onclick="leaveSettings()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h12"/></svg><span>Назад</span></button>
+        <div class="card settings-row"><div><strong>Тема приложения</strong><span class="muted">${document.body.classList.contains('dark') ? 'Черная' : 'Белая'}</span></div><input id="themeSwitch" class="switch" type="checkbox" ${document.body.classList.contains('dark') ? 'checked' : ''} onchange="toggleTheme()"></div>
+        <div class="card settings-row"><div><strong>Запомнить устройство</strong><span class="muted">Авто-вход после перезапуска</span></div><input id="rememberSwitch" class="switch" type="checkbox" ${rememberSession ? 'checked' : ''} onchange="toggleRememberSession()"></div>
+        <div class="card settings-row"><div><strong>Компактный режим</strong><span class="muted">Больше информации на экране</span></div><input id="compactViewSwitch" class="switch" type="checkbox" ${localStorage.getItem('plannerCompactView') === 'true' ? 'checked' : ''} onchange="toggleCompactView()"></div>
+        <div class="card settings-row"><div><strong>Подтверждать выход</strong><span class="muted">Защита от случайного выхода</span></div><input id="confirmLogoutSwitch" class="switch" type="checkbox" ${localStorage.getItem('plannerConfirmLogout') !== 'false' ? 'checked' : ''} onchange="toggleConfirmLogout()"></div>
+        <button class="primary wide" onclick="window.open('https://wa.me/77074162013', '_blank')">Поддержать автора</button>
+        ${isAdmin ? `<div class="card"><strong>Название логотипа</strong><input id="logoInput" class="field" value="${escapeHtml(logoText)}" placeholder="Название приложения"><button class="primary wide" onclick="saveLogo()">Сохранить логотип</button></div>` : ''}
+        ${isAdmin ? `<section class="card"><strong>Резервная копия данных</strong><p class="muted">Аккаунты, задания, статистика, фото и файлы олимпиад.</p><button class="secondary wide" type="button" onclick="exportPlannerBackup()">Скачать копию</button><label class="avatar-upload wide"><input id="plannerBackupInput" type="file" accept="application/json,.json" onchange="restorePlannerBackup(this)"><span>Восстановить из копии</span></label><p id="plannerBackupStatus" class="muted" role="status" aria-live="polite">Восстановление заменит текущие данные после подтверждения.</p></section>` : ''}
+        ${isAdmin ? '<button class="secondary wide" onclick="alert(\'Режим администратора открыт\')">Администратор активен</button>' : ''}
+        <button class="secondary wide" onclick="logout()">Выйти из аккаунта</button>
+      `;
+    }
+    function leaveSettings() {
+      const page = ['schedule', 'tasks', 'teachers', 'olympiads', 'stats', 'profile'].includes(previousPage) ? previousPage : 'schedule';
+      render(page);
+    }
+    function renderProfile() {
+      content.innerHTML = `
+        <section class="card profile-card">
+          <img class="profile-avatar-lg profile-avatar-xl" src="${getUserAvatar(currentUserLogin || 'user')}" alt="Фото профиля">
+          <div><strong>${escapeHtml(currentUserLogin || 'Профиль')}</strong><div class="muted">Личный профиль</div></div>
+        </section>
+        <label class="avatar-upload wide">
+          <input id="avatarUploadInput" type="file" accept="image/*">
+          <span>Изменить фото профиля</span>
+        </label>
+      `;
+      const avatarInput = document.querySelector('#avatarUploadInput');
+      if (avatarInput) avatarInput.addEventListener('change', handleAvatarUpload);
+    }
+    function applyTheme(theme = localStorage.getItem(themeKey) === 'dark') {
+      document.body.classList.toggle('dark', theme);
+      const themeSwitch = document.querySelector('#themeSwitch');
+      if (themeSwitch) themeSwitch.checked = theme;
+    }
+    function toggleCompactView() {
+      const isCompact = document.querySelector('#compactViewSwitch').checked;
+      localStorage.setItem('plannerCompactView', String(isCompact));
+      document.querySelector('#app').classList.toggle('compact-mode', isCompact);
+    }
+    function toggleConfirmLogout() {
+      localStorage.setItem('plannerConfirmLogout', String(document.querySelector('#confirmLogoutSwitch').checked));
+    }
+    function toggleTheme() {
+      const isDark = !document.body.classList.contains('dark');
+      localStorage.setItem(themeKey, isDark ? 'dark' : 'light');
+      applyTheme(isDark);
+      render(currentPage);
+    }
+    function toggleRememberSession() {
+      rememberSession = document.querySelector('#rememberSwitch').checked;
+      localStorage.setItem(rememberSessionKey, String(rememberSession));
+      if (rememberSession && currentUserLogin) localStorage.setItem(savedSessionKey, JSON.stringify({ login: currentUserLogin, isAdmin }));
+      else localStorage.removeItem(savedSessionKey);
+    }
+    function restoreRememberedSession() {
+      if (!rememberSession) return;
+      try {
+        const savedSession = JSON.parse(localStorage.getItem(savedSessionKey) || 'null');
+        if (!savedSession?.login) return;
+        if (savedSession.isAdmin) {
+          const account = adminAccounts.find(item => item.login.toLowerCase() === savedSession.login.toLowerCase());
+          if (account) openApp(true, account.login);
+          else localStorage.removeItem(savedSessionKey);
+          return;
+        }
+        const account = registeredAccounts.find(item => item.login.toLowerCase() === savedSession.login.toLowerCase());
+        if (account) openApp(false, account.login);
+        else localStorage.removeItem(savedSessionKey);
+      } catch (error) {
+        localStorage.removeItem(savedSessionKey);
+      }
+    }
+    function saveLogo() { if (!isAdmin) return; const updatedLogo = document.querySelector('#logoInput').value.trim(); if (!updatedLogo) return; logoText = updatedLogo; localStorage.setItem('plannerLogoText', logoText); render('settings'); }
+    function getUserAvatar(login) {
+      const key = `plannerAvatar:${(login || 'user').toLowerCase()}`;
+      const stored = localStorage.getItem(key);
+      return stored || `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><rect width='120' height='120' rx='60' fill='#dfeeff'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='48' font-family='Segoe UI, sans-serif' fill='#1769aa'>${(login || 'U').slice(0, 1).toUpperCase()}</text></svg>`)}`;
+    }
+    function saveUserAvatar(login, avatarData) {
+      if (!login) return;
+      localStorage.setItem(`plannerAvatar:${login.toLowerCase()}`, avatarData);
+      setCurrentUserAvatarInHeader();
+    }
+    function handleAvatarUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file || !currentUserLogin) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const avatar = String(reader.result);
+        saveUserAvatar(currentUserLogin, avatar);
+        render('profile');
+      };
+      reader.readAsDataURL(file);
+    }
+    function escapeHtml(value) { return String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]); }
+    function newTaskId() { return `task-${Date.now()}-${Math.random().toString(36).slice(2)}`; }
+    function isTaskCompleted(login, taskId) { return taskProgress.some(item => item.login === login && item.taskId === taskId && item.completed); }
+    function recordTaskActivity(action, task) {
+      if (!currentUserLogin) return;
+      taskActivity.unshift({ login: currentUserLogin, action, task: `${task.subject}: ${task.description}`, at: new Date().toISOString() });
+      taskActivity = taskActivity.slice(0, 100);
+      persistTaskActivity();
+    }
+    function setTaskCompletion(taskId, completed) {
+      if (!currentUserLogin) return;
+      const task = tasks.find(item => item.id === taskId);
+      if (!task) return;
+      taskProgress = taskProgress.filter(item => item.login !== currentUserLogin || item.taskId !== taskId);
+      if (completed) taskProgress.push({ login: currentUserLogin, taskId, completed: true, at: new Date().toISOString() });
+      persistTaskProgress();
+      recordTaskActivity(completed ? 'Выполнил задание' : 'Снял отметку', task);
+      if (isAdmin && document.querySelector('.nav-btn.active')?.dataset.page === 'stats') renderTaskStats();
+    }
+    function getAdminRoleLabel(login) {
+      const normalized = String(login || '').toLowerCase();
+      const labels = {
+        suleydev: 'Разработчик',
+        yerislam: 'Автор',
+        nuriden: 'Тестировщик',
+        qwertydev: 'Администратор'
+      };
+      return labels[normalized] || 'Администратор';
+    }
+    function renderTaskStats() {
+      const canViewSuleydevProgress = String(currentUserLogin).toLowerCase() === 'suleydev';
+      const users = [...new Map([ ...adminAccounts.map(({ login }) => ({ login, isAdmin: true })), ...registeredAccounts.map(account => ({ login: account.login, isAdmin: false })) ].map(user => [user.login.toLowerCase(), user])).values()];
+      const userStats = users.map(user => {
+        const hideProgress = user.login.toLowerCase() === 'suleydev' && !canViewSuleydevProgress;
+        const completedCount = hideProgress ? 0 : tasks.filter(task => isTaskCompleted(user.login, task.id)).length;
+        const taskRows = hideProgress ? '<p class="muted">Прогресс скрыт владельцем аккаунта.</p>' : tasks.map(task => {
+          const completed = isTaskCompleted(user.login, task.id);
+          return `<div class="stats-task"><span>${escapeHtml(task.subject)}: ${escapeHtml(task.description)}</span><span class="stats-task-status ${completed ? 'done' : ''}">${completed ? 'Выполнено' : 'Не выполнено'}</span></div>`;
+        }).join('');
+        const roleLabel = user.isAdmin ? getAdminRoleLabel(user.login) : 'Ученик';
+        const progressLabel = hideProgress ? 'Прогресс скрыт' : `${completedCount} из ${tasks.length} заданий`;
+        return `
+          <article class="card stats-user">
+            <div class="user-profile-row">
+              <img class="profile-avatar-lg" src="${getUserAvatar(user.login)}" alt="Аватар ${escapeHtml(user.login)}">
+              <div>
+                <strong>${roleLabel} · ${escapeHtml(user.login)}</strong>
+                <span>${progressLabel}</span>
+              </div>
+              ${user.isAdmin ? '' : `<button class="small-btn stats-user-delete" type="button" data-delete-user="${escapeHtml(user.login)}" aria-label="Удалить аккаунт ${escapeHtml(user.login)}">Удалить</button>`}
+            </div>
+            ${taskRows || '<p class="muted">Заданий пока нет.</p>'}
+          </article>
+        `;
+      }).join('');
+      const visibleActivity = taskActivity.filter(item => canViewSuleydevProgress || String(item.login).toLowerCase() !== 'suleydev');
+      const activityRows = visibleActivity.slice(0, 30).map(item => `<div class="stats-event"><div class="stats-event-copy"><img class="stats-event-avatar" src="${getUserAvatar(item.login)}" alt=""><div class="stats-event-detail"><strong>${escapeHtml(item.login)}</strong><span>${escapeHtml(item.action)} · ${escapeHtml(item.task)}</span></div></div><time>${new Date(item.at).toLocaleString('ru-RU')}</time></div>`).join('');
+      content.innerHTML = `<div class="section-row"><b class="eyebrow">ПРОГРЕСС КЛАССА</b><span class="muted">${users.length} пользователей · ${tasks.length} заданий</span></div>${userStats}<section class="stats-history"><h3>Последние действия</h3>${activityRows || '<p class="muted">Отметок пока нет.</p>'}</section>`;
+      content.querySelectorAll('[data-delete-user]').forEach(button => button.addEventListener('click', () => deleteRegisteredAccount(button.dataset.deleteUser)));
+    }
+    function deleteRegisteredAccount(login) {
+      if (!isAdmin) return;
+      const accountIndex = registeredAccounts.findIndex(account => account.login.toLowerCase() === String(login).toLowerCase());
+      if (accountIndex === -1) return;
+      const account = registeredAccounts[accountIndex];
+      const normalizedLogin = account.login.toLowerCase();
+      if (!confirm(`Удалить аккаунт ${account.login}, его фото, прогресс и историю действий? Это действие нельзя отменить без резервной копии.`)) return;
+      registeredAccounts.splice(accountIndex, 1);
+      taskProgress = taskProgress.filter(item => String(item.login).toLowerCase() !== normalizedLogin);
+      taskActivity = taskActivity.filter(item => String(item.login).toLowerCase() !== normalizedLogin);
+      localStorage.removeItem(`plannerAvatar:${normalizedLogin}`);
+      persistRegisteredAccounts();
+      persistTaskProgress();
+      persistTaskActivity();
+      renderTaskStats();
+    }
+    function openTaskEditor(index) { editingTaskIndex = index; const task = index === null ? { subject: '', description: '', due: '' } : tasks[index]; document.querySelector('#taskDialogTitle').textContent = index === null ? 'Добавить задание' : 'Изменить задание'; document.querySelector('#taskSubject').value = task.subject; document.querySelector('#taskDescription').value = task.description; document.querySelector('#taskDue').value = task.due; document.querySelector('#deleteTask').classList.toggle('hidden', index === null); document.querySelector('#taskDialog').showModal(); }
+    function openEditor(index) { editingTeacherIndex = index; const teacher = index === null ? { role: '', room: '' } : teachers[index]; document.querySelector('#teacherDialogTitle').textContent = index === null ? 'Добавить учителя' : 'Изменить учителя'; document.querySelector('#teacherRole').value = teacher.role; document.querySelector('#teacherRoom').value = teacher.room; document.querySelector('#deleteTeacher').classList.toggle('hidden', index === null); document.querySelector('#editDialog').showModal(); }
+    function openLessonEditor(index) { editingLessonIndex = index; const lesson = index === null ? ['', ''] : lessons[index]; document.querySelector('#lessonDialogTitle').textContent = index === null ? 'Добавить урок' : 'Изменить урок'; document.querySelector('#lessonSubject').value = lesson[0]; document.querySelector('#lessonRoom').value = lesson[1]; document.querySelector('#lessonDialog').showModal(); }
+    function openOlympiadDatabase() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open('schoolPlannerOlympiads', 1);
+        request.onupgradeneeded = () => request.result.createObjectStore('files', { keyPath: 'id', autoIncrement: true });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+    async function runOlympiadRequest(mode, operation) {
+      const database = await openOlympiadDatabase();
+      return new Promise((resolve, reject) => {
+        const transaction = database.transaction('files', mode);
+        const request = operation(transaction.objectStore('files'));
+        request.onerror = () => reject(request.error);
+        transaction.oncomplete = () => { database.close(); resolve(request.result); };
+        transaction.onerror = () => { database.close(); reject(transaction.error); };
+        transaction.onabort = () => { database.close(); reject(transaction.error); };
+      });
+    }
+    const backupStorageKeys = ['plannerAccounts', 'plannerTasks', 'plannerTaskProgress', 'plannerTaskActivity', 'plannerTeachers', 'plannerLogoText', 'plannerTheme', 'plannerRememberSession', 'plannerCompactView', 'plannerConfirmLogout'];
+    function readBlobAsBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+    }
+    function base64ToBlob(base64, type) {
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+      return new Blob([bytes], { type: type || 'application/octet-stream' });
+    }
+    async function exportPlannerBackup() {
+      if (!isAdmin) return;
+      const status = document.querySelector('#plannerBackupStatus');
+      try {
+        const runtimeData = { plannerAccounts: registeredAccounts, plannerTasks: tasks, plannerTaskProgress: taskProgress, plannerTaskActivity: taskActivity, plannerTeachers: teachers };
+        const localData = Object.fromEntries(backupStorageKeys.flatMap(key => {
+          const value = localStorage.getItem(key);
+          if (value !== null) return [[key, value]];
+          return Object.prototype.hasOwnProperty.call(runtimeData, key) ? [[key, JSON.stringify(runtimeData[key])]] : [];
+        }));
+        const avatars = Object.fromEntries(Object.keys(localStorage).filter(key => key.startsWith('plannerAvatar:')).map(key => [key.slice('plannerAvatar:'.length), localStorage.getItem(key)]));
+        const savedFiles = await runOlympiadRequest('readonly', store => store.getAll());
+        const olympiadFiles = await Promise.all(savedFiles.map(async file => ({
+          id: file.id,
+          name: file.name,
+          uploadedAt: file.uploadedAt,
+          type: file.blob.type,
+          base64: await readBlobAsBase64(file.blob)
+        })));
+        const backup = { format: 'nis-homework-backup', version: 1, createdAt: new Date().toISOString(), localData, avatars, olympiadFiles };
+        const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `nis-homework-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        if (status) status.textContent = 'Резервная копия скачана.';
+      } catch (error) {
+        if (status) status.textContent = 'Не удалось создать копию. Проверьте свободное место в браузере.';
+      }
+    }
+    async function restorePlannerBackup(input) {
+      if (!isAdmin) return;
+      const status = document.querySelector('#plannerBackupStatus');
+      const file = input.files?.[0];
+      if (!file) return;
+      try {
+        const backup = JSON.parse(await file.text());
+        const requiredArrays = ['plannerAccounts', 'plannerTasks', 'plannerTaskProgress', 'plannerTaskActivity', 'plannerTeachers'];
+        const validData = backup?.format === 'nis-homework-backup'
+          && backup.version === 1
+          && backup.localData && typeof backup.localData === 'object'
+          && requiredArrays.every(key => Array.isArray(JSON.parse(backup.localData[key] || 'null')))
+          && backup.avatars && typeof backup.avatars === 'object' && !Array.isArray(backup.avatars)
+          && Array.isArray(backup.olympiadFiles)
+          && backup.olympiadFiles.every(savedFile => savedFile && typeof savedFile.name === 'string' && typeof savedFile.base64 === 'string');
+        if (!validData) throw new Error('invalid backup');
+        const restoredFiles = backup.olympiadFiles.map(savedFile => ({
+          id: Number.isInteger(savedFile.id) ? savedFile.id : undefined,
+          name: savedFile.name,
+          uploadedAt: savedFile.uploadedAt || new Date().toISOString(),
+          blob: base64ToBlob(savedFile.base64, savedFile.type)
+        }));
+        if (!confirm(`Восстановить копию от ${new Date(backup.createdAt).toLocaleString('ru-RU')}? Текущие задания, пользователи, статистика и файлы будут заменены.`)) return;
+        await runOlympiadRequest('readwrite', store => {
+          const clearRequest = store.clear();
+          restoredFiles.forEach(savedFile => store.put(savedFile));
+          return clearRequest;
+        });
+        backupStorageKeys.forEach(key => {
+          if (Object.prototype.hasOwnProperty.call(backup.localData, key)) localStorage.setItem(key, backup.localData[key]);
+          else localStorage.removeItem(key);
+        });
+        Object.keys(localStorage).filter(key => key.startsWith('plannerAvatar:')).forEach(key => localStorage.removeItem(key));
+        Object.entries(backup.avatars).forEach(([login, avatar]) => localStorage.setItem(`plannerAvatar:${login.toLowerCase()}`, avatar));
+        if (status) status.textContent = 'Копия восстановлена. Страница перезагрузится.';
+        location.reload();
+      } catch (error) {
+        if (status) status.textContent = 'Не удалось восстановить копию. Проверьте файл и свободное место.';
+      } finally {
+        input.value = '';
+      }
+    }
+    async function renderOlympiadFiles() {
+      if (document.querySelector('.nav-btn.active')?.dataset.page !== 'olympiads') return;
+      try {
+        const files = await runOlympiadRequest('readonly', store => store.getAll());
+        if (document.querySelector('.nav-btn.active')?.dataset.page !== 'olympiads') return;
+        if (!isAdmin && files.length === 0) {
+          content.innerHTML = '';
+          title.textContent = '';
+          return;
+        }
+        if (!isAdmin && !document.querySelector('#olympiadFiles')) {
+          content.innerHTML = `${olympiadHeaderMarkup()}<div id="olympiadFiles"></div>`;
+          title.textContent = 'Олимпиады';
+        }
+        const currentList = document.querySelector('#olympiadFiles');
+        if (!currentList) return;
+        const count = document.querySelector('#olympiadCount');
+        if (count) count.textContent = `${files.length} ${files.length === 1 ? 'файл' : files.length >= 2 && files.length <= 4 ? 'файла' : 'файлов'}`;
+        currentList.innerHTML = files.length
+          ? files.sort((first, second) => Date.parse(second.uploadedAt) - Date.parse(first.uploadedAt)).map(file => {
+            const extension = file.name.split('.').pop().toUpperCase();
+            const typeClass = extension === 'PDF' ? 'pdf' : 'word';
+            return `<article class="card olympiad-file"><div class="olympiad-file-kind ${typeClass}" aria-hidden="true">${escapeHtml(extension)}</div><div class="olympiad-file-info"><strong>${escapeHtml(file.name)}</strong><span>${formatFileSize(file.blob.size)} · ${new Date(file.uploadedAt).toLocaleDateString('ru-RU')}</span></div><div class="olympiad-file-actions"><button class="small-btn" aria-label="Скачать ${escapeHtml(file.name)}" onclick="downloadOlympiadFile(${file.id})">Скачать</button>${isAdmin ? `<button class="small-btn" aria-label="Удалить ${escapeHtml(file.name)}" onclick="deleteOlympiadFile(${file.id})">Удалить</button>` : ''}</div></article>`;
+          }).join('')
+          : isAdmin ? '<p class="muted olympiad-empty">Здесь появятся загруженные задания и материалы.</p>' : '';
+      } catch (error) {
+        const currentList = document.querySelector('#olympiadFiles');
+        if (currentList) currentList.innerHTML = '<p class="error">Не удалось открыть хранилище файлов в этом браузере.</p>';
+      }
+    }
+    function notifyOlympiadFilesChanged() {
+      olympiadChannel?.postMessage('files-changed');
+      try { localStorage.setItem('plannerOlympiadsUpdatedAt', String(Date.now())); } catch (error) {}
+    }
+    if (olympiadChannel) olympiadChannel.addEventListener('message', event => {
+      if (event.data === 'files-changed') renderOlympiadFiles();
+    });
+    window.addEventListener('storage', event => {
+      if (event.key === 'plannerOlympiadsUpdatedAt') renderOlympiadFiles();
+      if (event.key === 'plannerTasks' && event.newValue) tasks = JSON.parse(event.newValue);
+      if (event.key === 'plannerTaskProgress') taskProgress = JSON.parse(event.newValue || '[]');
+      if (event.key === 'plannerTaskActivity') taskActivity = JSON.parse(event.newValue || '[]');
+      const activePage = document.querySelector('.nav-btn.active')?.dataset.page;
+      if (activePage === 'tasks' && ['plannerTasks', 'plannerTaskProgress'].includes(event.key)) render('tasks');
+      if (activePage === 'stats' && ['plannerTasks', 'plannerTaskProgress', 'plannerTaskActivity'].includes(event.key)) render('stats');
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && document.querySelector('#olympiadFiles')) renderOlympiadFiles();
+    });
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return `${bytes} Б`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} КБ`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`;
+    }
+    async function uploadOlympiadFiles(event) {
+      const input = event.currentTarget;
+      const status = document.querySelector('#olympiadUploadStatus');
+      const files = Array.from(event.files || input.files || []);
+      if (!isAdmin || files.length === 0) return;
+      const validFiles = files.filter(file => /\.(pdf|doc|docx)$/i.test(file.name));
+      if (validFiles.length !== files.length) {
+        status.textContent = 'Можно загружать только PDF- и Word-файлы.';
+        return;
+      }
+      if (validFiles.some(file => file.size > 20 * 1024 * 1024)) {
+        status.textContent = 'Размер каждого файла не должен превышать 20 МБ.';
+        return;
+      }
+      try {
+        for (const file of validFiles) {
+          await runOlympiadRequest('readwrite', store => store.add({ name: file.name, blob: file, uploadedAt: new Date().toISOString() }));
+        }
+        notifyOlympiadFilesChanged();
+        status.textContent = `Загружено файлов: ${validFiles.length}`;
+        input.value = '';
+        await renderOlympiadFiles();
+      } catch (error) {
+        status.textContent = 'Не удалось сохранить файлы. Проверьте свободное место в браузере.';
+      }
+    }
+    async function downloadOlympiadFile(id) {
+      try {
+        const file = await runOlympiadRequest('readonly', store => store.get(Number(id)));
+        if (!file) return;
+        const url = URL.createObjectURL(file.blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.name;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch (error) {
+        alert('Не удалось скачать файл.');
+      }
+    }
+    async function deleteOlympiadFile(id) {
+      if (!isAdmin || !confirm('Удалить этот файл?')) return;
+      try {
+        await runOlympiadRequest('readwrite', store => store.delete(Number(id)));
+        notifyOlympiadFilesChanged();
+        await renderOlympiadFiles();
+      } catch (error) {
+        alert('Не удалось удалить файл.');
+      }
+    }
+    document.querySelector('#loginForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const login = document.querySelector('#login').value.trim();
+      const password = document.querySelector('#password').value;
+      const error = document.querySelector('#loginError');
+      error.textContent = '';
+      try {
+        if (!login || !password) { error.textContent = 'Введи логин и пароль'; return; }
+        if (isRegisterMode) {
+          if (adminAccounts.some(account => account.login.toLowerCase() === login.toLowerCase()) || registeredAccounts.some(account => account.login.toLowerCase() === login.toLowerCase())) { error.textContent = 'Такой логин уже занят'; return; }
+          const passwordCredential = await createCredential(password);
+          registeredAccounts.push({ login, passwordCredential });
+          persistRegisteredAccounts();
+          isRegisterMode = false;
+          document.querySelector('#submitAuth').textContent = 'Войти';
+          document.querySelector('#switchAuth').textContent = 'Создать обычный аккаунт';
+          error.textContent = 'Аккаунт сохранен. Теперь войди с логином и паролем.';
+          return;
+        }
+        const adminMatch = adminAccounts.find(item => item.login.toLowerCase() === login.toLowerCase() && item.password === password);
+        if (adminMatch) { openApp(true, adminMatch.login); return; }
+        const account = registeredAccounts.find(item => item.login.toLowerCase() === login.toLowerCase());
+        if (!account || !await matchesCredential(password, account.passwordCredential)) { error.textContent = 'Аккаунт не найден или пароль неверен'; return; }
+        openApp(false, account.login);
+      } catch (authError) {
+        error.textContent = 'Не удалось сохранить аккаунт в этом браузере.';
+      }
+    });
+    document.querySelectorAll('.nav-btn[data-page]').forEach(btn => btn.addEventListener('click', () => render(btn.dataset.page)));
+    document.querySelector('#cancelEdit').addEventListener('click', () => document.querySelector('#editDialog').close());
+    document.querySelector('#saveEdit').addEventListener('click', () => { const teacher = { role: document.querySelector('#teacherRole').value.trim(), room: document.querySelector('#teacherRoom').value.trim() }; if (!teacher.role || !teacher.room) return; if (editingTeacherIndex === null) teachers.push(teacher); else teachers[editingTeacherIndex] = teacher; persistTeachers(); document.querySelector('#editDialog').close(); render('teachers'); });
+    document.querySelector('#deleteTeacher').addEventListener('click', () => { if (editingTeacherIndex !== null && confirm('Удалить этого учителя?')) { teachers.splice(editingTeacherIndex, 1); persistTeachers(); document.querySelector('#editDialog').close(); render('teachers'); } });
+    document.querySelector('#switchAuth').addEventListener('click', () => { isRegisterMode = !isRegisterMode; document.querySelector('#submitAuth').textContent = isRegisterMode ? 'Зарегистрироваться' : 'Войти'; document.querySelector('#switchAuth').textContent = isRegisterMode ? 'У меня уже есть аккаунт' : 'Создать обычный аккаунт'; document.querySelector('#loginError').textContent = ''; });
+    document.querySelector('#cancelLesson').addEventListener('click', () => document.querySelector('#lessonDialog').close());
+    document.querySelector('#saveLesson').addEventListener('click', () => { const lesson = [document.querySelector('#lessonSubject').value.trim(), document.querySelector('#lessonRoom').value.trim()]; if (lesson.every(Boolean)) { if (editingLessonIndex === null) lessons.push(lesson); else lessons[editingLessonIndex] = lesson; document.querySelector('#lessonDialog').close(); render('schedule'); } });
+    document.querySelector('#cancelTask').addEventListener('click', () => document.querySelector('#taskDialog').close());
+    document.querySelector('#saveTask').addEventListener('click', () => {
+      const subject = document.querySelector('#taskSubject').value.trim();
+      const description = document.querySelector('#taskDescription').value.trim();
+      const due = document.querySelector('#taskDue').value.trim();
+      if (!subject || !description || !due) return;
+      const isNewTask = editingTaskIndex === null;
+      const task = isNewTask ? { id: newTaskId(), subject, description, due } : { ...tasks[editingTaskIndex], subject, description, due };
+      if (isNewTask) tasks.push(task);
+      else tasks[editingTaskIndex] = task;
+      persistTasks();
+      recordTaskActivity(isNewTask ? 'Добавил задание' : 'Изменил задание', task);
+      document.querySelector('#taskDialog').close();
+      render('tasks');
+    });
+    document.querySelector('#deleteTask').addEventListener('click', () => {
+      if (editingTaskIndex === null || !confirm('Удалить это задание?')) return;
+      const [task] = tasks.splice(editingTaskIndex, 1);
+      taskProgress = taskProgress.filter(item => item.taskId !== task.id);
+      persistTaskProgress();
+      persistTasks();
+      recordTaskActivity('Удалил задание', task);
+      document.querySelector('#taskDialog').close();
+      render('tasks');
+    });
+    applyTheme();
+    document.querySelector('#settingsButton').addEventListener('click', () => {
+      if (currentPage !== 'settings') previousPage = currentPage;
+      render('settings');
+    });
+    const aiMenu = document.querySelector('#aiMenu');
+    const aiMenuButton = document.querySelector('#aiMenuButton');
+    function closeAiMenu() {
+      aiMenu.classList.remove('open');
+      aiMenuButton.setAttribute('aria-expanded', 'false');
+    }
+    aiMenuButton.addEventListener('click', () => {
+      const isOpen = aiMenu.classList.toggle('open');
+      aiMenuButton.setAttribute('aria-expanded', String(isOpen));
+    });
+    document.addEventListener('click', event => {
+      if (!event.target.closest('#aiMenu') && !event.target.closest('#aiMenuButton')) closeAiMenu();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') closeAiMenu();
+    });
+    aiMenu.addEventListener('click', event => {
+      if (event.target.closest('a')) closeAiMenu();
+    });
+    document.addEventListener('fullscreenchange', () => {
+      const button = document.querySelector('#settingsButton');
+      if (button) button.setAttribute('title', document.fullscreenElement ? 'Полный экран активен' : 'Настройки');
+    });
+    restoreRememberedSession();
+    const introSplash = document.querySelector('#introSplash');
+    const loginScreen = document.querySelector('#loginScreen');
+    const app = document.querySelector('#app');
+    loginScreen.inert = true;
+    app.inert = true;
+    window.setTimeout(() => {
+      introSplash.classList.add('intro-splash-exit');
+      syncScreenInteractivity();
+      window.setTimeout(() => introSplash.remove(), 450);
+    }, 1600);
+    updateCurrentDate();
+    setInterval(updateCurrentDate, 60000);
+  </script>
+</body>
+</html>
